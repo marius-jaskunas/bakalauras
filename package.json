@@ -1,0 +1,9 @@
+{
+  "name": "data-flow",
+  "version": "0.0.1",
+  "description": "Application for data and action flow management",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
