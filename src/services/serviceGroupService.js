@@ -9,7 +9,7 @@ const ResponseManager = require("./responseManager");
 exports.getAll = function (req, res) {
     ServiceGroup
         .find()
-        .populate("services")
+        .populate({path: "services", populate: [{ path: "inputs"}, {path: "outputs"}]})
         .exec(function (err, serviceGroups) {
             if (err) {
                 return res.send(ResponseManager.errorMessage(err));
@@ -73,11 +73,30 @@ exports.addInputToService = function (req, res) {
     });
 };
 
+exports.addOutputToService = function (req, res) {
+    const body = req.body;
+    Service.findById(body.serviceId, async  (err, service) => {
+        const output = new ServiceOutput;
+        output.name = body.name;
+        output.allowEmpty = true;
+
+        try {
+            await output.save();
+            service.outputs.push(output);
+            await service.save();
+        }
+        catch (error) {
+            return res.send(ResponseManager.errorMessage(err));
+        }
+        res.send(ResponseManager.successMessage("Output has been created"));
+    });
+};
+
 exports.getGroup = function (req, res) {
     ServiceGroup
         .findById(req.params.id)
-        .populate("services")
-        .exec(function (err, serviceGroup) {
+        .populate({path: "services", populate: [{ path: "inputs"}, {path: "outputs"}]})
+        .exec(async (err, serviceGroup) => {
             if (err) {
                 return res.send(ResponseManager.errorMessage(err));
             }

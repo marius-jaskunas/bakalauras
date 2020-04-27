@@ -5,6 +5,8 @@ module.exports = (from) =>  {
         inputs: from.inputs,
         outputs: from.outputs,
         selectedInput: true,
-        selectedOutput: false
+        selectedOutput: false,
+        selectedOutputValue: null,
+        selectedInputValue: null
     };
 };

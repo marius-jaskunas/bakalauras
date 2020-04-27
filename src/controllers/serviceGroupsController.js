@@ -12,6 +12,7 @@ router
 
 router
     .post("/services/add-input", auth, serviceGroupService.addInputToService)
+    .post("/services/add-output", auth, serviceGroupService.addOutputToService)
     .get("/services/:id", auth, serviceGroupService.getService);
 
 module.exports = router;
