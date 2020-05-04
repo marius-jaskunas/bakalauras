@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Application for data and action flow management",
   "scripts": {
+    "start": "node src/app.js",
     "serve": "nodemon src/app.js",
     "lint": "eslint"
   },
