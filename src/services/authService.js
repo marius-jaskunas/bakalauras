@@ -1,5 +1,5 @@
 const { User, validate } = require("../models/UserModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const Roles = require("../enums/roles");
 const ResponseManager = require("./responseManager");
 const MapUser = require("../mappers/MapUser");
@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
         email: req.body.email,
         role: Roles.Admin
     });
-    user.password = await bcrypt.hash(user.password, 10);
+    user.password = await bcrypt.hashSync(user.password, 10);
     await user.save();
 
     const token = user.generateAuthToken();
@@ -40,7 +40,7 @@ exports.login = async (req, res) => {
         return res.status(400).send(ResponseManager.errorMessage("Invalid credentials."));
     }
 
-    const match = await bcrypt.compare(req.body.password, user.password);
+    const match = await bcrypt.compareSync(req.body.password, user.password);
 
     if (match) {
         const token = user.generateAuthToken();
