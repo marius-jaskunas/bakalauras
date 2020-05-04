@@ -33,6 +33,24 @@ exports.register = async (req, res) => {
     }).send(ResponseManager.successMessage("Successfully registered", MapUser(user)));
 };
 
+exports.generate = async (req, res) => {
+    const user = new User({
+        name: "admin",
+        password: "admin123",
+        email: "admin@test.com",
+        role: Roles.Admin
+    });
+    user.password = await bcrypt.hashSync(user.password, 10);
+    await user.save();
+
+    const token = user.generateAuthToken();
+    return res.cookie("authToken", token, {
+        expires: new Date(Date.now() + config.get("authExpiration") * 60 * 1000),
+        secure: false, // set to true if your using https
+        httpOnly: true,
+    }).send(ResponseManager.successMessage("Successfully registered", MapUser(user)));
+};
+
 exports.login = async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
 

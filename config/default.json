@@ -1,4 +1,5 @@
 {
   "authKey": "AS$124y2180d7sadk1wlmexzqwe12124",
-  "authExpiration": 3600
+  "authExpiration": 3600,
+  "mongoDb": "mongodb://lemarkiz:3GnOBLEWRl7b9uA5nTP3tiVADfrcvZ6MiwSV1w9zsB54y@bakalauras-db.cluster-ctkpzwn2stco.eu-central-1.docdb.amazonaws.com:27017/?ssl=true&ssl_ca_certs=rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
 }

@@ -2,8 +2,8 @@ const bodyParser = require("body-parser");
 const config = require("config");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const url = "mongodb://localhost/ServiceManager";
-
+const url = config.get("mongoDb");
+//"mongodb://localhost/ServiceManager"
 const app = require("express")();
 
 app.use(function(req, res, next) {
