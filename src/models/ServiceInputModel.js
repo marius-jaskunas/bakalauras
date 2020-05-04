@@ -5,14 +5,28 @@ const schema = mongoose.Schema({
         type: String,
         required: true
     },
-    isSynchronous: {
-        type: Boolean,
-        required: true
-    },
     allowEmpty: {
         type: Boolean,
         required: true
-    }
+    },
+    url: {
+        type: String
+    },
+    apiKey: {
+        type: String
+    },
+    payloadEnabled: {
+        type: Boolean,
+        required: true
+    },
+    payload: {
+        type: Array,
+        required: false
+    },
+    parsedPayload: {
+        type: Object,
+        required: false
+    },
 });
 
 const ServiceInput = module.exports = mongoose.model("serviceInput", schema);

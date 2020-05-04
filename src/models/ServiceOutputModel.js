@@ -8,7 +8,19 @@ const schema = mongoose.Schema({
     allowEmpty: {
         type: Boolean,
         required: true
-    }
+    },
+    payloadEnabled: {
+        type: Boolean,
+        required: true
+    },
+    payload: {
+        type: Array,
+        required: false
+    },
+    parsedPayload: {
+        type: Object,
+        required: false
+    },
 });
 
 const ServiceOutput = module.exports = mongoose.model("serviceOutput", schema);
