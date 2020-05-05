@@ -7,7 +7,7 @@ const url = config.get("mongoDb");
 const app = require("express")();
 
 app.use(function(req, res, next) {
-    var allowedOrigins = ["http://localhost:8080", "https://bakalauras.s3.eu-central-1.amazonaws.com"];
+    var allowedOrigins = ["http://localhost:8080", "https://bakalauras.s3.eu-central-1.amazonaws.com", "http://bakalauras.s3.eu-central-1.amazonaws.com"];
     var origin = req.headers.origin;
     if(allowedOrigins.indexOf(origin) > -1){
         res.setHeader("Access-Control-Allow-Origin", origin);
