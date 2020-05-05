@@ -7,7 +7,7 @@ const url = config.get("mongoDb");
 const app = require("express")();
 
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Origin", "http://localhost:8080, https://bakalauras.s3.eu-central-1.amazonaws.com"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Expose-Headers", "Set-Cookie");

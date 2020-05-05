@@ -2,4 +2,4 @@
   "authKey": "AS$124y2180d7sadk1wlmexzqwe12124",
   "authExpiration": 3600,
   "mongoDb": "mongodb://dbadmin:admin123@18.184.164.253:27017/service_manager?authSource=service_manager&readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false"
-} 
+}
