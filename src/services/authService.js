@@ -46,6 +46,7 @@ exports.generate = async (req, res) => {
     const token = user.generateAuthToken();
     return res.cookie("authToken", token, {
         expires: new Date(Date.now() + config.get("authExpiration") * 60 * 1000),
+        sameSite: "None",
         secure: false, // set to true if your using https
         httpOnly: true,
     }).send(ResponseManager.successMessage("Successfully registered", MapUser(user)));
