@@ -4,6 +4,7 @@ const outputService = require("../services/outputService");
 
 router
     .post("/services/add-output", auth, outputService.addOutputToService)
+    .delete("/outputs/:id", auth, outputService.delete)
     .put("/outputs/update-payload", auth, outputService.addOutputPayload)
     .put("/outputs/update-payload-enabled", auth, outputService.updatePayloadEnabled)
     .put("/outputs/update-allow-empty", auth, outputService.updateAllowEmpty);

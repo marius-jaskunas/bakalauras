@@ -4,6 +4,7 @@ const inputService = require("../services/inputService");
 
 router
     .post("/services/add-input", auth, inputService.addInputToService)
+    .delete("/inputs/:id", auth, inputService.delete)
     .put("/inputs/update-payload", auth, inputService.addInputPayload)
     .put("/inputs/update-payload-enabled", auth, inputService.updatePayloadEnabled)
     .put("/inputs/update-connection-details", auth, inputService.updateConnectionDetails)

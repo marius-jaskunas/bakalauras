@@ -14,7 +14,7 @@ exports.addInputToService = function (req, res) {
             const input = new ServiceInput;
             input.name = body.name;
             input.allowEmpty = true;
-            input.payload = {};
+            input.payload = [];
             input.payloadEnabled = false;
 
             try {
@@ -115,5 +115,14 @@ exports.updateConnectionDetails = function (req, res) {
             return res.status(400).send(ResponseManager.errorMessage(error));
         }
         res.send(ResponseManager.successMessage("Input has been updated"));
+    });
+};
+
+exports.delete = function (req, res) {
+    ServiceInput.findByIdAndDelete(req.params.id, async  (err) => {
+        if (err) {
+            return res.status(400).send(ResponseManager.errorMessage(err));
+        }
+        res.send(ResponseManager.successMessage("Input has been deleted"));
     });
 };

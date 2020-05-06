@@ -56,6 +56,8 @@ exports.addOutputToService = function (req, res) {
             const output = new ServiceOutput;
             output.name = body.name;
             output.allowEmpty = true;
+            output.payload = [];
+            output.payloadEnabled = false;
 
             try {
                 await output.save();
@@ -96,5 +98,14 @@ exports.updateAllowEmpty = function (req, res) {
             return res.status(400).send(ResponseManager.errorMessage(error));
         }
         res.send(ResponseManager.successMessage("Output has been updated"));
+    });
+};
+
+exports.delete = function (req, res) {
+    ServiceOutput.findByIdAndDelete(req.params.id, async  (err) => {
+        if (err) {
+            return res.status(400).send(ResponseManager.errorMessage(err));
+        }
+        res.send(ResponseManager.successMessage("Output has been deleted"));
     });
 };
