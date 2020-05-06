@@ -33,23 +33,71 @@ exports.register = async (req, res) => {
     }).send(ResponseManager.successMessage("Successfully registered", MapUser(user)));
 };
 
-exports.generate = async (req, res) => {
-    const user = new User({
-        name: "admin",
-        password: "admin123",
-        email: "admin@test.com",
-        role: Roles.Admin
+exports.changePassword = function (req, res) {
+    const body = req.body;
+    User.findById(req.params.id, async  (err, user) => {
+        const match = await bcrypt.compareSync(body.oldPassword, user.password);
+
+        if (!match) {
+            return res.status(400).send(ResponseManager.errorMessage("Incorrect user password"));
+        }
+
+        user.password = await bcrypt.hashSync(body.newPassword, 10);
+        try {
+            await user.save();
+        }
+        catch (error) {
+            return res.status(400).send(ResponseManager.errorMessage(error));
+        }
+        res.send(ResponseManager.successMessage("User password has been updated"));
+    });
+};
+
+exports.delete = function (req, res) {
+    User.findByIdAndDelete(req.params.id, async  (err) => {
+        if (err) {
+            return res.status(400).send(ResponseManager.errorMessage(err));
+        }
+        res.send(ResponseManager.successMessage("User has been deleted"));
+    });
+};
+
+exports.getUsers = function (req, res) {
+    User
+        .find()
+        .exec(function (err, schemas) {
+            if (err) {
+                return res.status(400).send(ResponseManager.errorMessage(err));
+            }
+            res.send(ResponseManager.successMessage(
+                "Users retrieved successfully.",
+                schemas.map(x => MapUser(x))
+            ));
+        });
+};
+
+
+exports.createUser = async (req, res) => {
+    const { error } = validate(req.body);
+    if (error) {
+        return res.status(400).send(ResponseManager.errorMessage(error.details[0].message));
+    }
+
+    let user = await User.findOne({ email: req.body.email });
+    if (user) {
+        return res.status(400).send(ResponseManager.errorMessage("User already registered."));
+    }
+
+    user = new User({
+        name: req.body.name,
+        password: req.body.password,
+        email: req.body.email,
+        role: req.body.role
     });
     user.password = await bcrypt.hashSync(user.password, 10);
     await user.save();
 
-    const token = user.generateAuthToken();
-    return res.cookie("authToken", token, {
-        expires: new Date(Date.now() + config.get("authExpiration") * 60 * 1000),
-        sameSite: "None",
-        secure: false, // set to true if your using https
-        httpOnly: true,
-    }).send(ResponseManager.successMessage("Successfully registered", MapUser(user)));
+    return res.send(ResponseManager.successMessage("User successfully created"));
 };
 
 exports.login = async (req, res) => {

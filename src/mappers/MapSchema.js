@@ -18,6 +18,7 @@ module.exports = (from) =>  {
                     .map(input => {
                         const dataInput = x.inputs && x.inputs.find(dataInput => dataInput.name === input.name);
                         return {
+                            id: input.id,
                             data: dataInput && dataInput.data || [],
                             name: input.name,
                             links: [],
@@ -25,6 +26,8 @@ module.exports = (from) =>  {
                                 x: 0,
                                 y: 0
                             },
+                            parsedPayload: input.parsedPayload,
+                            payloadEnabled: input.payloadEnabled,
                             payload: input.payload,
                             allowEmpty: input.allowEmpty
                         };
@@ -33,6 +36,7 @@ module.exports = (from) =>  {
                     .map(output => {
                         const dataOutput = x.outputs && x.outputs.find(dataOutput => dataOutput.name === output.name);
                         return {
+                            id: output.id,
                             data: dataOutput && dataOutput.data || [],
                             name: output.name,
                             links: dataOutput && dataOutput.links || [],
@@ -40,6 +44,8 @@ module.exports = (from) =>  {
                                 x: 0,
                                 y: 0
                             },
+                            parsedPayload: output.parsedPayload,
+                            payloadEnabled: output.payloadEnabled,
                             payload: output.payload,
                             allowEmpty: output.allowEmpty
                         };
