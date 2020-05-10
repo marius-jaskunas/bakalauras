@@ -39,3 +39,22 @@ exports.getService = function (req, res) {
             res.send(ResponseManager.successMessage("Group retrieved successfully", MapService(service)));
         });
 };
+
+
+exports.delete = function (req, res) {
+    Service
+        .findById(req.params.id)
+        .populate("inputs")
+        .populate("outputs")
+        .exec(async function (err, service) {
+            if (schema.services.length) {
+                return res.status(400).send(ResponseManager.errorMessage("Service can not be deleted while there are inputs or outputs inside"));
+            }
+
+            await Service.findByIdAndDelete(req.params.id);
+            if (err) {
+                return res.status(400).send(ResponseManager.errorMessage(err));
+            }
+            res.send(ResponseManager.successMessage("service retrieved successfully", MapService(service)));
+        });
+};

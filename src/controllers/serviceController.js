@@ -5,6 +5,7 @@ const serviceService = require("../services/serviceService");
 
 router
     .post("/service-groups/add-service", auth, serviceService.addService)
-    .get("/services/:id", auth, serviceService.getService);
+    .get("/services/:id", auth, serviceService.getService)
+    .delete("/services/:id", auth, serviceService.delete);
 
 module.exports = router;

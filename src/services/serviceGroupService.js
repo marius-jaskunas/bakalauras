@@ -49,3 +49,21 @@ exports.getGroup = function (req, res) {
             res.send(ResponseManager.successMessage("Group retrieved successfully", MapServiceGroup(serviceGroup)));
         });
 };
+
+exports.delete = function (req, res) {
+    ServiceGroup
+        .findById(req.params.id)
+        .populate("services")
+        .exec(async (err, schema) => {
+            if (schema.services.length) {
+                return res.status(400).send(ResponseManager.errorMessage("Group can not be deleted while there are services inside"));
+            }
+
+            await ServiceGroup.findByIdAndDelete(req.params.id);
+            if (err) {
+                return res.status(400).send(ResponseManager.errorMessage(err));
+            }
+            res.send(ResponseManager.successMessage("Group was successfully deleted."));
+        });
+};
+

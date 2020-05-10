@@ -18,6 +18,18 @@ exports.getAll = function (req, res) {
         });
 };
 
+exports.get = function (req, res) {
+    Schemas
+        .findById(req.params.id)
+        .populate("services")
+        .exec(async (err, schema) => {
+            if (err) {
+                return res.status(400).send(ResponseManager.errorMessage(err));
+            }
+            res.send(ResponseManager.successMessage("Schema retrieved successfully.", MapSchema(schema)));
+        });
+};
+
 exports.create = async (req, res) => {
     const body = req.body;
 
@@ -40,7 +52,24 @@ exports.create = async (req, res) => {
     });
 };
 
-exports.update = function (req, res) {
+exports.delete = function (req, res) {
+    Schemas
+        .findById(req.params.id)
+        .populate("services")
+        .exec(async (err, schema) => {
+            if (schema.services.length) {
+                return res.status(400).send(ResponseManager.errorMessage("Schema can not be deleted while there are services inside"));
+            }
+
+            await Schemas.findByIdAndDelete(req.params.id);
+            if (err) {
+                return res.status(400).send(ResponseManager.errorMessage(err));
+            }
+            res.send(ResponseManager.successMessage("Schema was successfully deleted."));
+        });
+};
+
+exports.updateSchemaData = function (req, res) {
     const body = req.body;
     Schemas.findById(req.params.id, async  (err, schema) => {
         const services = await Service.find({
@@ -75,7 +104,7 @@ exports.update = function (req, res) {
     });
 };
 
-exports.updateEnabled = function (req, res) {
+exports.updateEnabledFlag = function (req, res) {
     const body = req.body;
     Schemas.findById(req.params.id, async  (err, schema) => {
         schema.enabled = body.enabled;
@@ -88,16 +117,4 @@ exports.updateEnabled = function (req, res) {
         }
         res.send(ResponseManager.successMessage(`Schema have been turned ${body.enabled ? "on" : "off"}.`));
     });
-};
-
-exports.get = function (req, res) {
-    Schemas
-        .findById(req.params.id)
-        .populate("services")
-        .exec(async (err, schema) => {
-            if (err) {
-                return res.status(400).send(ResponseManager.errorMessage(err));
-            }
-            res.send(ResponseManager.successMessage("Schema retrieved successfully.", MapSchema(schema)));
-        });
 };
