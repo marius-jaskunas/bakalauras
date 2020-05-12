@@ -111,6 +111,10 @@ exports.handleEvent = function (req, res) {
     Schemas.findById(schemaId)
         .populate({path: "services", populate: [{ path: "inputs"}, {path: "outputs"}]})
         .exec(async  (err, schema) => {
+            if (!schema) {
+                return res.status(400).send(ResponseManager.errorMessage("Schema not found."));
+            }
+
             const callerService = schema.data.find(x => x.id === serviceId);
             const callerOutput = callerService.outputs.find(x => x.name === eventName);
 

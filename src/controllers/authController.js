@@ -4,7 +4,7 @@ const authService = require("../services/authService");
 
 router
     .post("/register", authService.register)
-    .get ("/permissions", auth, authService.permissions)
+    .get ("/permissions", auth(), authService.permissions)
     .get("/users", authService.getUsers)
     .post("/users", authService.createUser)
     .put("/users/:id", authService.changePassword)

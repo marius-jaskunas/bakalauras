@@ -47,8 +47,12 @@ exports.delete = function (req, res) {
         .populate("inputs")
         .populate("outputs")
         .exec(async function (err, service) {
-            if (schema.services.length) {
-                return res.status(400).send(ResponseManager.errorMessage("Service can not be deleted while there are inputs or outputs inside"));
+            if (!service) {
+                return res.status(400).send(ResponseManager.errorMessage("Service not found."));
+            }
+
+            if (service.inputs.length || service.outputs.length) {
+                return res.status(400).send(ResponseManager.errorMessage("Service can not be deleted while there are inputs or outputs inside."));
             }
 
             await Service.findByIdAndDelete(req.params.id);

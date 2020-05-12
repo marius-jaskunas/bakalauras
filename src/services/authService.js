@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
         email: req.body.email,
         role: Roles.Admin
     });
-    user.password = await bcrypt.hashSync(user.password, 10);
+    user.password = await bcrypt.hash(user.password, 10);
     await user.save();
 
     const token = user.generateAuthToken();
@@ -36,13 +36,13 @@ exports.register = async (req, res) => {
 exports.changePassword = function (req, res) {
     const body = req.body;
     User.findById(req.params.id, async  (err, user) => {
-        const match = await bcrypt.compareSync(body.oldPassword, user.password);
+        const match = await bcrypt.compare(body.oldPassword, user.password);
 
         if (!match) {
             return res.status(400).send(ResponseManager.errorMessage("Incorrect user password"));
         }
 
-        user.password = await bcrypt.hashSync(body.newPassword, 10);
+        user.password = await bcrypt.hash(body.newPassword, 10);
         try {
             await user.save();
         }
@@ -94,7 +94,7 @@ exports.createUser = async (req, res) => {
         email: req.body.email,
         role: req.body.role
     });
-    user.password = await bcrypt.hashSync(user.password, 10);
+    user.password = await bcrypt.hash(user.password, 10);
     await user.save();
 
     return res.send(ResponseManager.successMessage("User successfully created"));
@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
         return res.status(400).send(ResponseManager.errorMessage("Invalid credentials."));
     }
 
-    const match = await bcrypt.compareSync(req.body.password, user.password);
+    const match = await bcrypt.compare(req.body.password, user.password);
 
     if (match) {
         const token = user.generateAuthToken();
@@ -123,5 +123,8 @@ exports.login = async (req, res) => {
 
 exports.permissions = async (req, res) => {
     const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+        return res.status(401).send(ResponseManager.errorMessage("User is not authorized."));
+    }
     res.send(ResponseManager.successMessage("Permissions retrieved successfully.", MapUser(user)));
 };
