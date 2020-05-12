@@ -7,6 +7,10 @@ exports.addInputToService = function (req, res) {
     Service.findById(body.serviceId)
         .populate("inputs")
         .exec(async  (err, service) => {
+            if (!service) {
+                return res.status(400).send(ResponseManager.errorMessage("Service not found."));
+            }
+
             if (service.inputs.some(x => x.name === body.name)) {
                 return res.status(400).send(ResponseManager.errorMessage("Input with the same name already exists."));
             }

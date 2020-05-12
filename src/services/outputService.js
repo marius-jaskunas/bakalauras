@@ -50,6 +50,10 @@ exports.addOutputToService = function (req, res) {
     Service.findById(body.serviceId)
         .populate("outputs")
         .exec(async  (err, service) => {
+            if (!service) {
+                return res.status(400).send(ResponseManager.errorMessage("Service not found."));
+            }
+
             if (service.outputs.some(x => x.name === body.name)) {
                 return res.status(400).send(ResponseManager.errorMessage("Output with the same name already exists."));
             }

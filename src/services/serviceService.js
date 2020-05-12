@@ -8,6 +8,10 @@ exports.addService = function (req, res) {
     ServiceGroup.findById(body.groupId)
         .populate("services")
         .exec(async  (err, serviceGroup) => {
+            if (!serviceGroup) {
+                return res.status(400).send(ResponseManager.errorMessage("Group not found."));
+            }
+            
             if (serviceGroup.services.some(x => x.name === body.name)) {
                 return res.status(400).send(ResponseManager.errorMessage("Service with the same name already exists."));
             }
@@ -33,6 +37,9 @@ exports.getService = function (req, res) {
         .populate("inputs")
         .populate("outputs")
         .exec(function (err, service) {
+            if (!service) {
+                return res.status(400).send(ResponseManager.errorMessage("Service not found."));
+            }
             if (err) {
                 return res.status(400).send(ResponseManager.errorMessage(err));
             }
@@ -59,6 +66,6 @@ exports.delete = function (req, res) {
             if (err) {
                 return res.status(400).send(ResponseManager.errorMessage(err));
             }
-            res.send(ResponseManager.successMessage("service retrieved successfully", MapService(service)));
+            res.send(ResponseManager.successMessage("Service has been deleted"));
         });
 };

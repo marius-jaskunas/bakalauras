@@ -21,7 +21,7 @@ exports.getAll = function (req, res) {
 exports.get = function (req, res) {
     Schemas
         .findById(req.params.id)
-        .populate("services")
+        .populate({path: "services", populate: [{ path: "inputs"}, {path: "outputs"}]})
         .exec(async (err, schema) => {
             if (err) {
                 return res.status(400).send(ResponseManager.errorMessage(err));
@@ -57,6 +57,10 @@ exports.delete = function (req, res) {
         .findById(req.params.id)
         .populate("services")
         .exec(async (err, schema) => {
+            if (!schema) {
+                return res.status(400).send(ResponseManager.errorMessage("Schema not found."));
+            }
+
             if (schema.services.length) {
                 return res.status(400).send(ResponseManager.errorMessage("Schema can not be deleted while there are services inside"));
             }
