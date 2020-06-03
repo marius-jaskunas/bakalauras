@@ -26,6 +26,8 @@ module.exports = (from) =>  {
                                 x: 0,
                                 y: 0
                             },
+                            url: input.url,
+                            apiKey: input.apiKey,
                             parsedPayload: input.parsedPayload,
                             payloadEnabled: input.payloadEnabled,
                             payload: input.payload,

@@ -26,7 +26,7 @@ const schema = mongoose.Schema({
     parsedPayload: {
         type: Object,
         required: false
-    },
+    }
 });
 
 const ServiceInput = module.exports = mongoose.model("serviceInput", schema);

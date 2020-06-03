@@ -80,6 +80,8 @@ const parsePayload = (payload, schema, main = false) => {
                 inputName: x,
                 message: `Types does not match. Expected: ${schema[x].type}, Received: ${typeof payload[x]}`
             });
+
+            acc[x] = payload[x];
         } else {
             acc[x] = payload[x];
         }
@@ -111,74 +113,136 @@ exports.handleEvent = function (req, res) {
     Schemas.findById(schemaId)
         .populate({path: "services", populate: [{ path: "inputs"}, {path: "outputs"}]})
         .exec(async  (err, schema) => {
-            if (!schema) {
-                return res.status(400).send(ResponseManager.errorMessage("Schema not found."));
-            }
+            try {
+                if (!schema) {
+                    return res.status(400).send(ResponseManager.errorMessage("Schema not found."));
+                }
 
-            const callerService = schema.data.find(x => x.id === serviceId);
-            const callerOutput = callerService.outputs.find(x => x.name === eventName);
+                const callerService = schema.data.find(x => x.id === serviceId);
+                const service = schema.services.find(x => x.id === serviceId);
 
-            // Validate api key
+                if (!service) {
+                    return res.status(400).send(ResponseManager.errorMessage("Service not found."));
+                }
 
-            const targets = callerOutput.links.map(x => {
-                const service = schema.services.find(y => y._id == x.blockId);
-                return service.inputs.find(y => y.name === x.name);
-            });
+                const callerOutput = callerService.outputs.find(x => x.name === eventName);
+                const output = service.outputs.find(x => x.name === eventName);
 
-            const sqs = new AWS.SQS({apiVersion: "2012-11-05"});
+                if (!output) {
+                    return res.status(400).send(ResponseManager.errorMessage("Output not found."));
+                }
 
-            const errors = [];
+                if (callerOutput.data && callerOutput.data.apiKey !== req.headers["authorization"]) {
+                    return res.status(403).send(ResponseManager.errorMessage("Invalid API Key"));
+                }
 
-            const requests = targets.map(x => {
-                let requestBody = body;
+                if (!schema.enabled) {
+                    return res.status(400).send(ResponseManager.errorMessage("Schema is not enabled."));
+                }
 
-                if (Object.values(requestBody).length) {
-                    if (x.payloadEnabled) {
-                        const parsedPayload = parsePayload(requestBody, x.parsedPayload, true);
+                const targets = callerOutput.links.map(x => {
+                    const service = schema.services.find(y => y._id == x.blockId);
+                    return service.inputs.find(y => y.name === x.name);
+                });
+
+                const requestErrors = [];
+
+                if (Object.values(body).length) {
+                    if (output.payloadEnabled) {
+                        const parsedPayload = parsePayload(body, output.parsedPayload, true);
 
                         if (parsedPayload.errors.length) {
-                            errors.push({
-                                serviceInputName: x.name,
+                            requestErrors.push({
                                 errors: parsedPayload.errors
                             });
                         }
-                        requestBody = parsedPayload.data;
-                    } else {
-                        requestBody = {};
                     }
                 } else {
-                    if (x.payloadEnabled && !x.allowEmpty) {
-                        errors.push({
-                            serviceInputName: x.name,
+                    if (output.payloadEnabled && !output.allowEmpty) {
+                        requestErrors.push({
                             message: "Payload is expected, but was empty"
+                        });
+                    }
+                }
+
+                if (requestErrors.length) {
+                    return res.status(400).send(ResponseManager.errorMessage("Body does not match output payload.", requestErrors));
+                }
+                const sqs = new AWS.SQS({apiVersion: "2012-11-05"});
+
+                const errors = [];
+
+                const requests = targets.map(x => {
+                    let requestBody = body;
+
+                    if (Object.values(requestBody).length) {
+                        if (x.payloadEnabled) {
+                            const parsedPayload = parsePayload(requestBody, x.parsedPayload, true);
+
+                            if (parsedPayload.errors.length) {
+                                errors.push({
+                                    serviceInputName: x.name,
+                                    errors: parsedPayload.errors
+                                });
+                                return null;
+                            }
+                            requestBody = parsedPayload.data;
+                        } else {
+                            requestBody = {};
+                        }
+                    } else {
+                        if (x.payloadEnabled && !x.allowEmpty) {
+                            errors.push({
+                                inputName: x.name,
+                                message: "Payload is expected, but was empty"
+                            });
+
+                            return null;
+                        }
+                    }
+
+                    if (!x.url || x.url === "") {
+                        errors.push({
+                            inputName: x.name,
+                            message: "Missing URL"
                         });
 
                         return null;
                     }
+
+                    return JSON.stringify({
+                        payload: requestBody,
+                        url: x.url,
+                        apiKey: x.apiKey || ""
+                    });
+                }).filter(x => x);
+
+                console.log(JSON.stringify(requests));
+
+                const promises = requests.map(x => {
+                    const params = {
+                        MessageBody: x,
+                        QueueUrl: "https://sqs.eu-central-1.amazonaws.com/957344130478/Schema_Service_Inputs"
+                    };
+
+                    return sqs.sendMessage(params).promise();
+                });
+
+                const results = await Promise.all(promises);
+
+                if (errors.length) {
+                    return res.status(207).send(ResponseManager.successMessage({
+                        sentMessages: results,
+                        errors: errors
+                    }));
                 }
 
-                return JSON.stringify({
-                    payload: requestBody,
-                    url: x.url,
-                    apiKey: x.apiKey || ""
-                });
-            });
-
-            if (errors.length) {
-                return res.status(400).send(ResponseManager.errorMessage({inputErrors: errors} ));
+                return res.send(ResponseManager.successMessage({
+                    sentMessages: results,
+                    errors: errors
+                }));
+            } catch (e) {
+                return res.status(500).send(ResponseManager.errorMessage("Failed to process", e));
             }
-
-            const promises = requests.map(x => {
-                const params = {
-                    MessageBody: x,
-                    QueueUrl: "https://sqs.eu-central-1.amazonaws.com/957344130478/Schema_Service_Inputs"
-                };
-
-                return sqs.sendMessage(params).promise();
-            });
-
-            const results = await Promise.all(promises);
-
-            return res.send(ResponseManager.successMessage(results));
         });
 };
