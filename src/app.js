@@ -33,7 +33,7 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
-mongoose.connect(url, { useNewUrlParser: true});
+mongoose.connect(url, { useNewUrlParser: true}).catch(error => console.error("FATAL ERROR: Connection failed", error));;
 
 const db = mongoose.connection;
 if(!db)
