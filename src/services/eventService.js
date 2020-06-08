@@ -176,7 +176,7 @@ exports.handleEvent = function (req, res) {
                     let requestBody = body;
 
                     if (Object.values(requestBody).length) {
-                        if (x.payloadEnabled) {
+                        if (x.payloadEnabled && Object.keys(x.parsedPayload).length > 0) {
                             const parsedPayload = parsePayload(requestBody, x.parsedPayload, true);
 
                             if (parsedPayload.errors.length) {
