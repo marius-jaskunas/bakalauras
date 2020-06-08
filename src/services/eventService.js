@@ -176,7 +176,7 @@ exports.handleEvent = function (req, res) {
                     let requestBody = body;
 
                     if (Object.values(requestBody).length) {
-                        if (x.payloadEnabled && Object.keys(x.parsedPayload).length > 0) {
+                        if (x.payloadEnabled && x.parsedPayload) {
                             const parsedPayload = parsePayload(requestBody, x.parsedPayload, true);
 
                             if (parsedPayload.errors.length) {
@@ -216,8 +216,6 @@ exports.handleEvent = function (req, res) {
                         apiKey: x.apiKey || ""
                     });
                 }).filter(x => x);
-
-                console.log(JSON.stringify(requests));
 
                 const promises = requests.map(x => {
                     const params = {
